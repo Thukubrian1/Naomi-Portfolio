@@ -1,3 +1,4 @@
+document.addEventListener('DOMContentLoaded', function() {
     // Navigation functionality
     const navbar = document.getElementById('navbar');
     const hamburger = document.getElementById('hamburger');
@@ -66,17 +67,19 @@
 
     // CTA button smooth scroll
     const ctaButton = document.querySelector('.cta-button');
-    ctaButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetSection = document.querySelector('#contact');
-        const offsetTop = targetSection.offsetTop - 80;
-        window.scrollTo({
-            top: offsetTop,
-            behavior: 'smooth'
+    if (ctaButton) {
+        ctaButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetSection = document.querySelector('#contact');
+            const offsetTop = targetSection.offsetTop - 80;
+            window.scrollTo({
+                top: offsetTop,
+                behavior: 'smooth'
+            });
         });
-    });
+    }
 
-    // Skills animation on scroll
+    // Fixed Skills animation on scroll
     const observerOptions = {
         threshold: 0.3,
         rootMargin: '0px 0px -50px 0px'
@@ -86,21 +89,59 @@
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const skillBars = entry.target.querySelectorAll('.skill-progress');
-                skillBars.forEach(bar => {
+                skillBars.forEach((bar, index) => {
                     const width = bar.getAttribute('data-width');
+                    // Add staggered delay for each skill bar
                     setTimeout(() => {
                         bar.style.width = width;
-                    }, 200);
+                        bar.style.transition = 'width 1.5s ease';
+                    }, 200 + (index * 100));
                 });
                 skillsObserver.unobserve(entry.target);
             }
         });
     }, observerOptions);
 
+    // Initialize skills section
     const skillsSection = document.querySelector('.skills-section');
     if (skillsSection) {
+        // Initialize all progress bars to 0 width
+        const allSkillBars = skillsSection.querySelectorAll('.skill-progress');
+        allSkillBars.forEach(bar => {
+            bar.style.width = '0%';
+            bar.style.transition = 'none';
+        });
+        
         skillsObserver.observe(skillsSection);
     }
+
+    // Alternative method: Trigger on scroll if intersection observer doesn't work
+    let skillsAnimated = false;
+    
+    function checkSkillsAnimation() {
+        if (skillsAnimated) return;
+        
+        const skillsSection = document.querySelector('.skills-section');
+        if (!skillsSection) return;
+        
+        const rect = skillsSection.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight * 0.7;
+        
+        if (isVisible) {
+            skillsAnimated = true;
+            const skillBars = skillsSection.querySelectorAll('.skill-progress');
+            skillBars.forEach((bar, index) => {
+                const width = bar.getAttribute('data-width');
+                setTimeout(() => {
+                    bar.style.width = width;
+                    bar.style.transition = 'width 1.5s ease';
+                }, 200 + (index * 100));
+            });
+        }
+    }
+    
+    // Backup scroll listener for skills
+    window.addEventListener('scroll', checkSkillsAnimation);
 
     // Timeline animation
     const timelineObserver = new IntersectionObserver((entries) => {
@@ -158,62 +199,64 @@
     const contactForm = document.getElementById('contactForm');
     const successMessage = document.getElementById('successMessage');
 
-    contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        // Get form data
-        const formData = new FormData(contactForm);
-        const name = formData.get('name');
-        const email = formData.get('email');
-        const subject = formData.get('subject');
-        const message = formData.get('message');
-
-        // Simple validation
-        if (!name || !email || !subject || !message) {
-            alert('Please fill in all fields.');
-            return;
-        }
-
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            alert('Please enter a valid email address.');
-            return;
-        }
-
-        // Simulate form submission
-        const submitBtn = contactForm.querySelector('.submit-btn');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Sending...';
-        submitBtn.disabled = true;
-
-        // Simulate API call delay
-        setTimeout(() => {
-            // Show success message
-            successMessage.classList.add('show');
+    if (contactForm) {
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
             
-            // Reset form
-            contactForm.reset();
-            
-            // Reset button
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
+            // Get form data
+            const formData = new FormData(contactForm);
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const subject = formData.get('subject');
+            const message = formData.get('message');
 
-            // Hide success message after 5 seconds
+            // Simple validation
+            if (!name || !email || !subject || !message) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+
+            // Simulate form submission
+            const submitBtn = contactForm.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+
+            // Simulate API call delay
             setTimeout(() => {
-                successMessage.classList.remove('show');
-            }, 5000);
+                // Show success message
+                successMessage.classList.add('show');
+                
+                // Reset form
+                contactForm.reset();
+                
+                // Reset button
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
 
-            // Log form data (in real application, this would be sent to a server)
-            console.log('Form submitted:', {
-                name,
-                email,
-                subject,
-                message,
-                timestamp: new Date().toISOString()
-            });
-        }, 1500);
-    });
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    successMessage.classList.remove('show');
+                }, 5000);
+
+                // Log form data (in real application, this would be sent to a server)
+                console.log('Form submitted:', {
+                    name,
+                    email,
+                    subject,
+                    message,
+                    timestamp: new Date().toISOString()
+                });
+            }, 1500);
+        });
+    }
 
     // Floating icons animation enhancement
     const floatingIcons = document.querySelectorAll('.floating-icon');
@@ -236,11 +279,6 @@
         if (heroGraphics) {
             heroGraphics.style.transform = `translateY(${scrolled * 0.5}px)`;
         }
-    });
-
-    // Add loading animation
-    window.addEventListener('load', () => {
-        document.body.classList.add('loaded');
     });
 
     // Intersection Observer for fade-in animations
@@ -322,3 +360,12 @@
     scrollToTopBtn.addEventListener('mouseleave', () => {
         scrollToTopBtn.style.transform = 'translateY(0)';
     });
+
+    // Check skills animation on initial load
+    setTimeout(checkSkillsAnimation, 500);
+});
+
+// Add loading animation
+window.addEventListener('load', () => {
+    document.body.classList.add('loaded');
+});

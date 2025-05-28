@@ -260,7 +260,10 @@
                     <div class="success-message" id="successMessage">
                         Thank you for your message! I'll get back to you soon.
                     </div>
-                    <form id="contactForm">
+                    <form id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+
+                        <input type="hidden" name="access_key" value="YOUR_ACCESS_KEY_HERE">
+                        
                         <div class="form-group">
                             <input type="text" id="name" name="name" placeholder="Your Name" required>
                         </div>
